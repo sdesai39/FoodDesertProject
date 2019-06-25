@@ -18,3 +18,15 @@ with open ('../data/County GeoJSON.json') as json_file:
                     x["properties"]["% Minority"]=row[10]
                     newjson["features"].append(x)
 print(newjson["features"][3])
+
+conn = 'mongodb://localhost:27017'
+client = pymongo.MongoClient(conn)
+
+db = client.FDI_db
+collection = db.Counties
+
+collection.insert_one(newjson)
+
+results = db.Counties.find()
+for result in results:
+    print(result["features"][3])
