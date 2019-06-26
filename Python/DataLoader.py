@@ -3,12 +3,12 @@ import csv
 import pymongo
 
 
-with open ('../data/County GeoJSON.json') as json_file:
+with open ('../Data/County GeoJSON.json') as json_file:
     countydata = json.load(json_file)
     newjson = {"type": "FeatureCollection","features": []}
     for x in countydata["features"]:
         fips=int(x["properties"]["STATE"]+x["properties"]["COUNTY"])
-        with open ('../data/FIP_FDI_percentage.csv') as csv_file:
+        with open ('../Data/FIP_FDI_percentage.csv') as csv_file:
             next(csv_file)
             csv_reader = csv.reader(csv_file, delimiter=',')
             for row in csv_reader:
