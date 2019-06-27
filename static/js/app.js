@@ -1,17 +1,82 @@
 var url = "/api/counties";
-d3.json(url, function(error, data) {
-    data = JSON.parse(data);
-});
+const API_KEY = "pk.eyJ1Ijoic2Rlc2FpMzkiLCJhIjoiY2p4ZjhxbnFpMGpmdzN4cGJqMWlraGVoNiJ9.45WtM8lsO2O7A4gIg8NCYw";
 
 
 
 
+
+function filter(data,state) {
+    if(state == "USA") {
+        var newjson = data;
+        var zoom = 3;
+        var center = [39.82,-98.58];
+        return [newjson,center,zoom];
+    }
+    else {
+        var zoom = 5;
+        var filterlist = [];
+        var newjson = {
+            "type": "FeatureCollection",
+            "features": []
+        };
+        var code = key[state][1];
+        var center = key[state][0];
+        data["features"].forEach(function(feature) {
+            if(feature["properties"]["STATE"]===code) {
+                filterlist.push(feature);
+            };
+        })
+        newjson["features"] = filterlist;
+        return [newjson,center,zoom];
+        }
+    }
+
+function choro(data,map) {
+    console.log("choro started")
+    L.choropleth(data, {
+        valueProperty: "FD%",
+        scale: ["#ffffb2","#b10026"],
+        steps: 20,
+        mode: "q",
+        style: {
+            color: "#fff",
+            weight: 1,
+            fillOpacity: 0.8
+        }
+    }).addTo(map)
+}
+
+stateselect = d3.select("#stateselect");
+stateselect.on("change", function() {
+    var state = stateselect.property("value")
+    document.getElementById("map").innerHTML = ""
+    console.log("state is:"+state)
+    d3.json(url, function(error, data) {
+        var data = JSON.parse(data);
+        var neededvalues = filter(data[0],state);
+        console.log(neededvalues)
+        var center = neededvalues[1];
+        var zoom = neededvalues[2];
+        var geojson = neededvalues[0];
+        var myMap = L.map("map", {
+            center: center,
+            zoom: zoom
+        });
+        L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+            attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+            maxZoom: 18,
+            id: "mapbox.light",
+            accessToken: API_KEY
+        }).addTo(myMap);
+        choro(geojson,myMap)
+    })
+})
 
 
 const key = {
     "Alabama": [[32.81,-86.79],"01"],
     "Alaska": [[61.37,-152.40],"02"],
-    "Arizona": [[33.73,-111.43],"04"],
+    "Arizona": [[34.04,-111.09],"04"],
     "Arkansas": [[24.97,-92.37],"05"],
     "California": [[36.11,-119.68],"06"],
     "Colorado": [[39.06,-105.31],"08"],
@@ -59,4 +124,4 @@ const key = {
     "West Virginia": [[38.49,-80.9554],"54"],
     "Wisconsin": [[44.27,-89.62],"55"],
     "Wyoming": [[42.76,-107.30],"56"],
-}
+} 
