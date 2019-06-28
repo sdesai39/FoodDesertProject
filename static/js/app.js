@@ -2,9 +2,6 @@ var url = "/api/counties";
 const API_KEY = "pk.eyJ1Ijoic2Rlc2FpMzkiLCJhIjoiY2p4ZjhxbnFpMGpmdzN4cGJqMWlraGVoNiJ9.45WtM8lsO2O7A4gIg8NCYw";
 
 
-
-
-
 function filter(data,state) {
     if(state == "USA") {
         var newjson = data;
@@ -13,7 +10,7 @@ function filter(data,state) {
         return [newjson,center,zoom];
     }
     else {
-        var zoom = 5;
+        var zoom = 6;
         var filterlist = [];
         var newjson = {
             "type": "FeatureCollection",
@@ -27,13 +24,14 @@ function filter(data,state) {
             };
         })
         newjson["features"] = filterlist;
+        console.log(newjson)
         return [newjson,center,zoom];
         }
     }
 
 function choro(data,map) {
-    console.log("choro started")
-    L.choropleth(data, {
+    console.log(data)
+    var geojson = L.choropleth(data, {
         valueProperty: "FD%",
         scale: ["#ffffb2","#b10026"],
         steps: 20,
@@ -42,14 +40,37 @@ function choro(data,map) {
             color: "#fff",
             weight: 1,
             fillOpacity: 0.8
-        }
+        },
+        onEachFeature: function(feature, layer) {
+            layer.bindPopup("County:"+feature.properties["NAME"]+"<br>% in Food Desert<br>"+parseFloat(feature.properties["FD%"]*100).toFixed(2)+"%<br>Median Household Income:<br>" +
+              "$" + parseFloat(feature.properties["Median Icome"]).toFixed(2).toLocaleString("en")+"<br>% Minority Pop.:<br>"+parseFloat(feature.properties["% Minority"]*100).toFixed(2)+"%");
+    }
     }).addTo(map)
+    var legend = L.control({ position: "bottomright" });
+    legend.onAdd = function() {
+        var div = L.DomUtil.create("div", "info legend");
+        var limits = geojson.options.limits;
+        var colors = geojson.options.colors;
+        var labels = [];
+        console.log(limits[limits.length-1])
+    var legendInfo = "<h1>% of Pop. in Food Desert</h1>" +
+        "<div class=\"labels\">" +
+          "<div class=\"min\">" + parseFloat(limits[0]*100).toFixed(2) + "%</div>" +
+          "<div class=\"max\">" + (parseFloat(limits[limits.length-1])*100).toFixed(2) + "%</div>" +
+        "</div>";
+    div.innerHTML = legendInfo;
+    limits.forEach(function(limit, index) {
+        labels.push("<li style=\"background-color: " + colors[index] + "\"></li>");
+    });
+    div.innerHTML += "<ul>"+ labels.join("") + "</ul>";
+    return div;
+    };
+    legend.addTo(map)
 }
-
 stateselect = d3.select("#stateselect");
 stateselect.on("change", function() {
     var state = stateselect.property("value")
-    document.getElementById("map").innerHTML = ""
+    
     console.log("state is:"+state)
     d3.json(url, function(error, data) {
         var data = JSON.parse(data);
@@ -58,17 +79,20 @@ stateselect.on("change", function() {
         var center = neededvalues[1];
         var zoom = neededvalues[2];
         var geojson = neededvalues[0];
-        var myMap = L.map("map", {
-            center: center,
-            zoom: zoom
-        });
-        L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+        document.getElementById("map").innerHTML= "<div id='map'></div>"
+        d3.select("#map").remove()
+        var div = d3.select("#dummy").append("div")
+        div.attr("id","map")
+        var lightmap = new L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
             attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
             maxZoom: 18,
             id: "mapbox.light",
             accessToken: API_KEY
-        }).addTo(myMap);
-        choro(geojson,myMap)
+        });
+        var myMap = new L.map("map");
+        myMap.setView(center,zoom);
+        myMap.addLayer(lightmap);
+        choro(geojson,myMap);
     })
 })
 
@@ -84,7 +108,7 @@ const key = {
     "Delaware": [[39.32,-75.51],"10"],
     "Florida": [[27.77,-81.69],"12"],
     "Georgia": [[33.04,-83.64],"13"],
-    "Hawaii": [[],"15"],
+    "Hawaii": [[19.89,-155.28],"15"],
     "Idaho": [[44.24,-114.48],"16"],
     "Illinois": [[40.35,-88.99],"17"],
     "Indiana": [[39.85,-86.26],"18"],
