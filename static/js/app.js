@@ -85,6 +85,7 @@ stateselect.on("change", function() {
         myMap.setView(center,zoom);
         myMap.addLayer(lightmap);
         choro(geojson,myMap);
+        chart(geojson)
     })
 })
 
@@ -140,4 +141,101 @@ const key = {
     "West Virginia": [[38.49,-80.9554],"54"],
     "Wisconsin": [[44.27,-89.62],"55"],
     "Wyoming": [[42.76,-107.30],"56"],
-} 
+}
+
+function chart(data) {
+    var features = data["features"];
+    var income = []
+    features.forEach(function(feature) {
+        income.push(parseFloat(feature.properties["Median Icome"]))    
+        });
+        
+    var minpop = []
+    features.forEach(function(feature) {
+        minpop.push(parseFloat(feature.properties["% Minority"]))
+        });
+
+            
+    var whitepop = []
+    features.forEach(function(feature) {
+        whitepop.push(parseFloat(feature.properties["% White"]))
+        });
+
+            
+    var FD = []
+        features.forEach(function(feature) {
+        FD.push(parseFloat(feature["properties"]["FD%"]))
+        });
+    d3.select("#chart1").remove()
+    var div1 = d3.select("#dummy1").append("canvas")
+    div1.attr("id","chart1")
+    var ctx = document.getElementById("chart1");
+    incomescatter = [];
+    minpopscatter =[];
+    for(i=0;i<income.length;i++) {
+        adict = {};
+        adict["x"] = income[i];
+        adict["y"] = FD[i];
+        incomescatter.push(adict)
+    };
+    for(i=0;i<minpop.length;i++) {
+        adict = {};
+        adict["x"] = minpop[i];
+        adict["y"] = FD[i];
+        minpopscatter.push(adict)
+    };
+    incomescatterset = {
+        label: "Income vs FD%",
+        data: incomescatter,
+        borderColor: '#2196f3',        
+        backgroundColor: '#2196f3',
+        pointRadius: 5
+    }
+    minpopscatterset = {
+        label: "Minority Population % vs FD%",
+        data: minpopscatter,
+        borderColor: 'red',        
+        backgroundColor: 'red',
+        pointRadius: 5
+    }
+    console.log(incomescatterset)
+    var incomescatterchart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [minpopscatterset,incomescatterset],
+        },
+        options: {
+            tooltips: {
+                callbacks: {
+                   label: function(tooltipItem, data) {
+                      if(tooltipItem.datasetIndex===0) {
+                        return ["Minority Population %: "+parseFloat(tooltipItem.xLabel*100).toFixed(2),'% in Food Desert: ' + parseFloat(tooltipItem.yLabel*100).toFixed(2)+"%"];
+                      }
+                      if(tooltipItem.datasetIndex===1) {
+                        return ["Median Income: $"+tooltipItem.xLabel.toFixed(2).toLocaleString("en"),'% in Food Desert: ' + parseFloat(tooltipItem.yLabel*100).toFixed(2)+"%"];
+                      }
+                   }
+                }
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Minority Population % or Median Income'
+                      }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: '% in Food Desert'
+                      }
+                }]
+            
+            }
+        }
+    });
+    
+
+}
