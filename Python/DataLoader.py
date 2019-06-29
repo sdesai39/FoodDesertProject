@@ -1,14 +1,15 @@
 import json
 import csv
 import pymongo
+from bson import json_util
 
 
-with open ('../Data/County GeoJSON.json') as json_file:
+with open ('../static/data/County GeoJSON.json') as json_file:
     countydata = json.load(json_file)
     newjson = {"type": "FeatureCollection","features": []}
     for x in countydata["features"]:
         fips=int(x["properties"]["STATE"]+x["properties"]["COUNTY"])
-        with open ('../Data/FIP_FDI_percentage.csv') as csv_file:
+        with open ('../static/data/FIP_FDI_percentage.csv') as csv_file:
             next(csv_file)
             csv_reader = csv.reader(csv_file, delimiter=',')
             for row in csv_reader:
@@ -32,6 +33,21 @@ collection = db.Counties
 
 
 collection.insert_one(newjson)
-results = collection.find()
+cursor = collection.find({})
+file = open("collection.json", "w")
+file.write('[')
+
+qnt_cursor = 0
+for document in cursor:
+    qnt_cursor += 1
+    num_max = cursor.count()
+    if (num_max == 1):
+        file.write(json.dumps(document, indent=4, default=json_util.default))
+    elif (num_max >= 1 and qnt_cursor <= num_max-1):
+        file.write(json.dumps(document, indent=4, default=json_util.default))
+        file.write(',')
+    elif (qnt_cursor == num_max):
+        file.write(json.dumps(document, indent=4, default=json_util.default))
+file.write(']')
 
 client.close()

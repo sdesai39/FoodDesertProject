@@ -1,7 +1,5 @@
 var url = "/api/counties";
 const API_KEY = "pk.eyJ1Ijoic2Rlc2FpMzkiLCJhIjoiY2p4ZjhxbnFpMGpmdzN4cGJqMWlraGVoNiJ9.45WtM8lsO2O7A4gIg8NCYw";
-
-
 function filter(data,state) {
     if(state == "USA") {
         var newjson = data;
@@ -24,13 +22,11 @@ function filter(data,state) {
             };
         })
         newjson["features"] = filterlist;
-        console.log(newjson)
         return [newjson,center,zoom];
         }
     }
 
 function choro(data,map) {
-    console.log(data)
     var geojson = L.choropleth(data, {
         valueProperty: "FD%",
         scale: ["#ffffb2","#b10026"],
@@ -42,8 +38,8 @@ function choro(data,map) {
             fillOpacity: 0.8
         },
         onEachFeature: function(feature, layer) {
-            layer.bindPopup("County:"+feature.properties["NAME"]+"<br>% in Food Desert<br>"+parseFloat(feature.properties["FD%"]*100).toFixed(2)+"%<br>Median Household Income:<br>" +
-              "$" + parseFloat(feature.properties["Median Icome"]).toFixed(2).toLocaleString("en")+"<br>% Minority Pop.:<br>"+parseFloat(feature.properties["% Minority"]*100).toFixed(2)+"%");
+            layer.bindPopup("<strong>County:</strong><br>"+feature.properties["NAME"]+"<br><strong>% in Food Desert</strong><br>"+parseFloat(feature.properties["FD%"]*100).toFixed(2)+"%<br><strong>Median Household Income:</strong><br>" +
+              "$" + parseFloat(feature.properties["Median Icome"]).toFixed(2).toLocaleString("en")+"<br><strong>% Minority Pop.:</strong><br>"+parseFloat(feature.properties["% Minority"]*100).toFixed(2)+"%");
     }
     }).addTo(map)
     var legend = L.control({ position: "bottomright" });
@@ -52,7 +48,6 @@ function choro(data,map) {
         var limits = geojson.options.limits;
         var colors = geojson.options.colors;
         var labels = [];
-        console.log(limits[limits.length-1])
     var legendInfo = "<h1>% of Pop. in Food Desert</h1>" +
         "<div class=\"labels\">" +
           "<div class=\"min\">" + parseFloat(limits[0]*100).toFixed(2) + "%</div>" +
@@ -70,12 +65,9 @@ function choro(data,map) {
 stateselect = d3.select("#stateselect");
 stateselect.on("change", function() {
     var state = stateselect.property("value")
-    
-    console.log("state is:"+state)
     d3.json(url, function(error, data) {
-        var data = JSON.parse(data);
-        var neededvalues = filter(data[0],state);
-        console.log(neededvalues)
+        data = data[0]
+        var neededvalues = filter(data,state);
         var center = neededvalues[1];
         var zoom = neededvalues[2];
         var geojson = neededvalues[0];

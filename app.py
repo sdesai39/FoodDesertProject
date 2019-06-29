@@ -4,7 +4,8 @@ from flask import (
     render_template,
     jsonify,
     request,
-    redirect
+    redirect,
+    current_app
 )
 import pymongo
 import json
@@ -20,15 +21,12 @@ def home():
 
 @app.route("/api/counties")
 def counties():
-    conn = 'mongodb://localhost:27017'
-    client = pymongo.MongoClient(conn)
-
-    db = client.FDI_db
-
-    results = db.Counties.find()
-    l = list(results)
-    x = dumps(l)
-    return jsonify(x)
+    filename = os.path.join(app.static_folder,'data/FDIdb.json')
+    print(filename)
+    with open(filename) as json_file:
+        data = json.load(json_file)
+        return jsonify(data)
+        
     
 
 if __name__=="__main__":
