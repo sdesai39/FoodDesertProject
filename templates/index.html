@@ -2,7 +2,11 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Food Deserts in America</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>  
 
     <!-- Leaflet CSS & JS-->
     <link rel="shortcut icon" href="#">
@@ -37,9 +41,25 @@
   </head>
   <body>
 
+  <div class="container">
+      <div class="row">
+        <div class="col-md-12 jumbotron text-center">
+          <h3 style="color: blue"> Food Deserts in America Dashboard</h3>
+          <p>Interactive charts that explore the FDI, income, location & race</p>
+        </div>
+      </div>
+    <div class="row">
+      <div class="col-md-12">
+      <br>
+      </div>
+    </div>
+
     <!-- The div where we will inject our map -->
-    <div>
-      <select id="stateselect">
+    <div class="row">
+        <div class="col-md-3">
+          <div class="well">
+            <h5>SELECT STATE:</h5>
+            <select id="stateselect">
           <option value="Alabama">Alabama</option>
           <option value="Alaska">Alaska</option>
           <option value="Arizona">Arizona</option>
@@ -93,13 +113,13 @@
         <option value="USA">USA</option>
       </select>
     </div>
-    <div id="dummy"><div id="map"></div></div>
-    <div id="dummy1"><canvas id="chart1"></canvas></div>
+    <div id="dummy"><center><div id="map"></center></div></div>
+    <div id="dummy1"><center><canvas id="chart1"></center></canvas></div>
 
     
     <!-- <script type="text/javascript" src="static/js/config.js"></script> -->
     <script type = "text/javascript" 
          src = "{{ url_for('static', filename = 'js/app.js') }}" ></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.js"></script>
+    <center><script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.js"></script></center>
   </body>
 </html>
