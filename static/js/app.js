@@ -30,7 +30,7 @@ function choro(data,map) {
     var geojson = L.choropleth(data, {
         valueProperty: "FD%",
         scale: ["#ffffb2","#b10026"],
-        steps: 20,
+        steps: 5,
         mode: "q",
         style: {
             color: "#fff",
