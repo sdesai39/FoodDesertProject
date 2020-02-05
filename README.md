@@ -4,5 +4,5 @@ map of the United States that shows the relaative percentage of the population t
 It also shows plots comparing the percentage of population that lives in a food desert to the median income
 and the percent of the population that is considered a minority.
 
-The app is hosted on heroku and can be found at the below link.
+The app is hosted on heroku and can be found at the below link.\n
 https://sdesai39-bootcamp-project2.herokuapp.com
